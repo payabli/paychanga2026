@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HOA Checkout</title>
+<style>
+:root{--bg:#f4f6f5;--card:#fff;--ink:#17231e;--mut:#66756e;--line:#dfe6e2;--acc:#1f6f4a;--acc2:#e8f3ed;--warn:#b4561b;--warnbg:#fdf0e6;--bad:#b3261e;--ok:#1f6f4a}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1512;--card:#17201b;--ink:#e8efeb;--mut:#93a39b;--line:#2a372f;--acc:#4cc38a;--acc2:#1b2e24;--warn:#f0a066;--warnbg:#2c2016;--bad:#ff8a80;--ok:#4cc38a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:var(--acc);color:#fff;padding:18px 16px}
+header .in{max-width:1000px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{width:64px;height:64px;border-radius:50%;background:#fff;object-fit:contain;padding:2px}
+header h1{margin:0;font-size:20px}header small{opacity:.85}
+main{max-width:1200px;margin:20px auto;padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) minmax(480px,540px);gap:20px}
+main>*{min-width:0}
+@media(max-width:900px){main{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+.card h2{margin:0 0 12px;font-size:16px}
+.acct{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;color:var(--mut);font-size:13px}.acct b{color:var(--ink);font-weight:600}
+.grp{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:14px 0 6px}
+.row{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row label{flex:1;cursor:pointer}.row .d{color:var(--mut);font-size:13px}
+.amt{font-variant-numeric:tabular-nums;font-weight:600}
+.tag{font-size:11px;padding:2px 7px;border-radius:99px;background:var(--warnbg);color:var(--warn);margin-left:6px}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--acc)}
+input[type=text],input[type=password],select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.f{margin-bottom:10px}.f span{display:block;font-size:12px;color:var(--mut);margin-bottom:3px}
+.sl{display:flex;justify-content:space-between;gap:12px;padding:6px 0}.sl span:last-child{font-variant-numeric:tabular-nums;text-align:right;min-width:90px}
+.sum .t{display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:8px;padding-top:12px;font-size:18px;font-weight:700}
+.gear{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5);display:flex;align-items:center;gap:6px}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:20px;width:min(420px,92vw)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog h2{margin:0 0 12px;font-size:17px}.dlg-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.dlg-actions .primary{background:var(--acc);color:#fff;border:0}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 12px}
+button.pay{width:100%;background:var(--acc);color:#fff;border:0;padding:13px;font-size:16px;font-weight:600;margin-top:12px}
+button:disabled{opacity:.5;cursor:not-allowed}
+.dev{display:flex;gap:8px;margin-bottom:8px}
+.devs{display:grid;gap:8px;margin-top:8px}
+.dv{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.dv.sel{border-color:var(--acc);background:var(--acc2)}.dv.off{opacity:.55}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--mut)}.dot.online{background:var(--ok)}.dot.busy{background:var(--warn)}
+.dv small{color:var(--mut)}
+.status{margin-top:12px;padding:12px;border-radius:10px;font-size:14px;display:none;border:1px solid var(--line)}
+.status.show{display:block}.status.wait{background:var(--warnbg);color:var(--warn)}.status.ok{background:var(--acc2);color:var(--ok)}.status.err{color:var(--bad)}
+pre{white-space:pre-wrap;word-break:break-all;font-size:12px;margin:8px 0 0;color:var(--mut)}
+details summary{cursor:pointer;font-weight:600}
+.hint{font-size:12px;color:var(--mut)}
+.tabs{display:flex;gap:6px;margin-bottom:14px;background:var(--bg);padding:4px;border-radius:10px}
+.tab{flex:1;border:0;background:transparent;padding:8px;border-radius:8px;font-weight:600;color:var(--mut)}
+.tab.on{background:var(--card);color:var(--acc);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+#pay-component-1{margin:0 -4px;padding:4px;width:calc(100% + 8px);overflow:visible}
+#pay-component-1 iframe{width:100%!important}
+#payEmb{margin-top:15px}
+#cardhint:empty{display:none}
+#cardPane{overflow:visible}
+</style>
+</head>
+<body>
+<header><div class="in"><div class="brand"><img src="logo.jpg" alt="Evergreen Scapes Community logo"><div><h1>Evergreen Scapes Community</h1><small>Resident payment portal</small></div></div><button class="gear" id="gear" type="button" title="Settings">⚙ Settings</button></div></header>
+<main>
+<section>
+  <div class="card">
+    <h2>Account</h2>
+    <div class="acct"><span>Resident</span><b>Jordan Rivera</b><span>Unit</span><b>230 Evergreen Scapes, Lot 14</b><span>Account #</span><b>HOA-0230-014</b><span>Statement date</span><b id="sd"></b></div>
+  </div>
+  <div class="card">
+    <h2>Select charges to pay</h2>
+    <div id="items"></div>
+  </div>
+</section>
+<aside>
+  <div class="card sum">
+    <h2>Order summary</h2>
+    <div id="lines"></div>
+    <div class="t"><span>Total due</span><span id="total">$0.00</span></div>
+  </div>
+  <div class="card">
+    <h2>Payment method</h2>
+    <div class="tabs"><button type="button" class="tab on" id="tabDev">Device</button><button type="button" class="tab" id="tabCard">Card</button><button type="button" class="tab" id="tabAch">Bank (ACH)</button></div>
+    <div id="devPane">
+      <div class="dev"><button id="refresh" type="button">Refresh devices</button><span class="hint" id="devhint" style="align-self:center">Loading…</span></div>
+      <div class="devs" id="devs"></div>
+      <button class="pay" id="pay" disabled>Collect Payment $0.00</button>
+    </div>
+    <div id="cardPane" style="display:none">
+      <div id="pay-component-1"></div>
+      <div class="hint" id="cardhint"></div>
+      <button class="pay" id="payEmb" disabled>Collect Payment $0.00</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+</aside>
+</main>
+<dialog id="cfg">
+  <form method="dialog" id="cfgform" autocomplete="off">
+    <h2>Settings</h2>
+    <div class="f"><span>Paypoint entry name (230 Evergreen Scapes)</span><input type="text" id="entry" autocomplete="off" placeholder="Paypoint entry name"></div>
+    <div class="f"><span>Payabli customerId (payer)</span><input type="text" id="cust" autocomplete="off" placeholder="e.g. 4440"></div>
+    <div class="f"><span>API base URL</span><input type="text" id="base" value="https://api-sandbox.payabli.com"></div>
+    <div class="f"><span>Public API token (for the Card / ACH component)</span><input type="text" id="pub" autocomplete="off" placeholder="Public token for the paypoint"></div>
+    <div class="grp">Authentication</div>
+    <div class="f"><span>OAuth clientId</span><input type="text" id="cid" autocomplete="off" placeholder="OAuth client ID"></div>
+    <div class="f"><span>OAuth clientSecret</span><input type="password" id="csec" autocomplete="new-password" placeholder="OAuth client secret"></div>
+    <div class="f"><span>API token (used only if no OAuth credentials)</span><input type="password" id="token" autocomplete="new-password" placeholder="Static sandbox API token"></div>
+    <p class="hint">With OAuth credentials, a session token is generated automatically (and renewed when it expires) and used to list devices and process payments. Secrets are masked and cleared from this form once saved. Settings are kept in memory only and are lost when you refresh or close this page.</p>
+    <details style="margin-top:8px"><summary class="hint" style="cursor:pointer">Paste credentials…</summary>
+      <textarea id="imptxt" rows="6" autocomplete="off" spellcheck="false" placeholder="Paste text like: entryname = …, Customer ID = …, clientId = …, API Key = …" style="width:100%;margin-top:6px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:12px monospace"></textarea>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><button type="button" id="imp">Parse &amp; fill</button><span class="hint" id="impmsg"></span></div>
+    </details>
+    <div class="dlg-actions"><button type="button" id="cfgcancel">Cancel</button><button type="button" id="cfgclear">Clear</button><button type="submit" class="primary" id="cfgsave">Save</button></div>
+  </form>
+</dialog>
+
+<script>
+const CHARGES=[
+ {g:'HOA dues',id:'q4',n:'Quarterly dues — Q4 2026',d:'Oct 1 – Dec 31',a:425.00},
+ {g:'HOA dues',id:'sa',n:'Special assessment — roof & drainage',d:'Installment 2 of 4',a:150.00},
+ {g:'Miscellaneous fees',id:'fob',n:'Replacement gate fob',d:'Requested Oct 12',a:45.00},
+ {g:'Miscellaneous fees',id:'park',n:'Guest parking permit',d:'Annual',a:25.00},
+ {g:'Miscellaneous fees',id:'arc',n:'Architectural review fee',d:'Fence replacement',a:75.00},
+ {g:'Late fees',id:'lf',n:'Late fee — Q3 dues',d:'Past due since Jul 15',a:35.00,late:1},
+ {g:'Late fees',id:'int',n:'Interest on past-due balance',d:'1.5% monthly',a:6.38,late:1}
+];
+const $=s=>document.querySelector(s), money=n=>'$'+n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+const sel=new Set(CHARGES.map(c=>c.id)); let devices=[], dev=null, busy=false;
+$('#sd').textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+// Settings live in a dialog. Everything is held in memory only: nothing is written to
+// localStorage/sessionStorage/cookies, so a refresh or closing the tab wipes it all.
+const S={token:'',entry:'',cust:'',base:'https://api-sandbox.payabli.com',cid:'',csec:'',pub:''};
+const PLAIN=['entry','cust','base','cid','pub'], SECRET=['token','csec'];
+let session=null; // {token, exp} generated from OAuth credentials
+// remove anything saved by earlier versions of this page
+try{['hoa_entry','hoa_cust','hoa_base','hoa_cid','hoa_pub','hoa_token','hoa_csec'].forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k)})}catch(e){}
+// Parse pasted credential text ("name = value" lines) into the settings form fields.
+function importText(txt){
+  const got=[];let type='';
+  const set=(id,label,v)=>{if(!v||/^\[.*\]$/.test(v))return;$('#'+id).value=v;got.push(label)};
+  txt.split(/\r?\n/).forEach(line=>{
+    const i=line.indexOf('=');if(i<0)return;
+    const k=line.slice(0,i).trim().toLowerCase().replace(/\s+/g,' '),v=line.slice(i+1).trim();
+    if(k==='api key type')type=v.toLowerCase();
+    else if(k==='api key')set(type==='public'?'pub':'token',type==='public'?'public token':'API token',v);
+    else if(k==='entryname'||k==='entry name'||k==='entry')set('entry','entry name',v);
+    else if(k==='customer id'||k==='customerid')set('cust','customer ID',v);
+    else if(k==='clientid')set('cid','clientId',v);
+    else if(k==='clientsecret')set('csec','clientSecret',v);
+  });
+  return got;
+}
+$('#imp').onclick=()=>{
+  const got=importText($('#imptxt').value);
+  $('#imptxt').value='';
+  $('#impmsg').textContent=got.length?'Filled: '+got.join(', ')+'. Review and click Save.':'Nothing recognised in that text.';
+};
+// plain fields are shown in clear; secrets are never pre-filled
+function fillDlg(){PLAIN.forEach(k=>$('#'+k).value=S[k]);SECRET.forEach(k=>$('#'+k).value='');$('#imptxt').value='';$('#impmsg').textContent='';
+  $('#csec').placeholder=S.csec?'•••••••• (saved — leave blank to keep)':'OAuth client secret';
+  $('#token').placeholder=S.token?'•••••••• (saved — leave blank to keep)':'Static sandbox API token'}
+function openSettings(){fillDlg();$('#cfg').showModal()}
+$('#gear').onclick=openSettings;
+$('#cfgcancel').onclick=()=>{fillDlg();$('#cfg').close()};
+$('#cfgclear').onclick=()=>{[...PLAIN,...SECRET].forEach(k=>{S[k]=k==='base'?'https://api-sandbox.payabli.com':'';});session=null;fillDlg();};
+$('#cfgform').addEventListener('submit',()=>{
+  PLAIN.forEach(k=>S[k]=$('#'+k).value.trim());
+  SECRET.forEach(k=>{const v=$('#'+k).value.trim();if(v)S[k]=v});
+  S.base=S.base||'https://api-sandbox.payabli.com';
+  session=null;
+  SECRET.forEach(k=>$('#'+k).value='');$('#imptxt').value='';
+  loadDevices();
+  if(embActive())initEmbedded(true);
+});
+// Returns the bearer token to use: an OAuth session token if client credentials are saved, else the static API token.
+async function getToken(){
+  if(!(S.cid&&S.csec))return S.token;
+  if(session&&Date.now()<session.exp)return session.token;
+  const r=await fetch(S.base.replace(/\/+$/,'')+'/api/v2/Token/serverside',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clientId:S.cid,clientSecret:S.csec})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.access_token)throw Object.assign(new Error(j.errorMessage||'Could not generate session token (HTTP '+r.status+')'),{body:j});
+  session={token:j.access_token,exp:Date.now()+Math.max(60,(j.expires_in||3600)-60)*1000};
+  return session.token;
+}
+
+function renderItems(){
+  let h='',last='';
+  CHARGES.forEach(c=>{
+    if(c.g!==last){h+=`<div class="grp">${c.g}</div>`;last=c.g}
+    h+=`<div class="row"><input type="checkbox" id="c_${c.id}" ${sel.has(c.id)?'checked':''}><label for="c_${c.id}">${c.n}${c.late?'<span class="tag">Past due</span>':''}<div class="d">${c.d}</div></label><span class="amt">${money(c.a)}</span></div>`;
+  });
+  $('#items').innerHTML=h;
+  CHARGES.forEach(c=>$('#c_'+c.id).addEventListener('change',e=>{e.target.checked?sel.add(c.id):sel.delete(c.id);update()}));
+}
+const total=()=>Math.round(CHARGES.filter(c=>sel.has(c.id)).reduce((s,c)=>s+c.a,0)*100)/100;
+function update(){
+  const by={};CHARGES.filter(c=>sel.has(c.id)).forEach(c=>by[c.g]=(by[c.g]||0)+c.a);
+  $('#lines').innerHTML=Object.entries(by).map(([g,v])=>`<div class="sl"><span>${g}</span><span>${money(v)}</span></div>`).join('')||'<div class="hint">No charges selected</div>';
+  $('#total').textContent=money(total());
+  $('#pay').textContent=`Collect Payment ${money(total())}`;
+  $('#pay').disabled=busy||!dev||total()<=0;
+  $('#payEmb').textContent='Collect Payment '+money(total());
+  $('#payEmb').disabled=busy||!embReady||total()<=0;
+}
+function renderDevs(){
+  $('#devs').innerHTML=devices.map((d,i)=>{
+    const st=(d.operationalStatus||'unknown').toLowerCase(), usable=st==='online'&&d.deviceStatus!==0;
+    return `<div class="dv ${dev&&dev.deviceId===d.deviceId?'sel':''} ${usable?'':'off'}" data-i="${i}"><span class="dot ${st}"></span><div><b>${d.friendlyName||d.description||d.serialNumber||d.deviceId}</b><br><small>${[d.make,d.model].filter(Boolean).join(' ')||'Device'} · ${st}${d.serialNumber?' · S/N '+d.serialNumber:''}</small></div></div>`;
+  }).join('');
+  document.querySelectorAll('.dv').forEach(el=>el.onclick=()=>{dev=devices[+el.dataset.i];renderDevs();update()});
+}
+function cfg(){
+  return {...S,base:S.base.replace(/\/+$/,'')};
+}
+function say(kind,html){const s=$('#status');s.className='status show '+kind;s.innerHTML=html}
+async function api(path,opt={}){
+  const c=cfg(), tok=await getToken();
+  const r=await fetch(c.base+path,{...opt,headers:{Authorization:'Bearer '+tok,requestToken:tok,'Content-Type':'application/json'}});
+  const t=await r.text();let j;try{j=JSON.parse(t)}catch(e){j={raw:t}}
+  if(!r.ok)throw Object.assign(new Error(j.responseText||j.reason||j.explanation||('HTTP '+r.status)),{body:j});
+  return j;
+}
+async function loadDevices(){
+  const c=cfg();
+  if(!(c.token||(c.cid&&c.csec))||!c.entry){$('#devhint').textContent='Not configured — open ⚙ Settings';return}
+  $('#devhint').textContent='Loading…';
+  try{
+    const j=await api(`/api/Query/devices/${encodeURIComponent(c.entry)}?limitRecord=50&sortBy=desc(createdAt)`);
+    devices=(j.Records||[]).filter(d=>d.deviceStatus!==0);
+    if(dev&&!devices.find(d=>d.deviceId===dev.deviceId))dev=null;
+    $('#devhint').textContent=devices.length?`${devices.length} device(s)`:'No devices registered';
+    renderDevs();update();
+  }catch(e){$('#devhint').textContent='Failed: '+e.message;devices=[];renderDevs()}
+}
+// find a key anywhere in a response, case-insensitive
+function pick(o,key){if(!o||typeof o!=='object')return;for(const k in o){if(k.toLowerCase()===key.toLowerCase()&&o[k]!=null&&typeof o[k]!=='object')return o[k]}for(const k in o){const v=pick(o[k],key);if(v!==undefined)return v}}
+async function pay(){
+  const c=cfg(),amt=total();
+  if(!c.cust)return say('err','Payer customerId is missing — open ⚙ Settings.')
+  busy=true;update();$('#refresh').disabled=true;
+  say('wait','Sending sale to <b>'+(dev.friendlyName||dev.deviceId)+'</b>…');
+  try{
+    const body={
+      paymentDetails:{totalAmount:amt,serviceFee:0},
+      paymentMethod:{method:'device',device:dev.deviceId},
+      customerData:{customerId:Number(c.cust)||c.cust},
+      entryPoint:c.entry,
+      ipaddress:'255.255.255.255'
+    };
+    const j=await api('/api/v2/MoneyIn/getpaid',{method:'POST',body:JSON.stringify(body)});
+    const id=pick(j,'paymentTransId')||pick(j,'transId');
+    if(!id)throw Object.assign(new Error(j.reason||'No transaction ID returned'),{body:j});
+    say('wait',`Sale initiated (txn <b>${id}</b>). <b>Present card on the ${dev.friendlyName||'device'}…</b>`);
+    await poll(id,amt);
+  }catch(e){say('err','Payment failed: '+e.message+`<pre>${JSON.stringify(e.body||{},null,1).slice(0,800)}</pre>`)}
+  busy=false;$('#refresh').disabled=false;update();
+}
+async function poll(id,amt){
+  const end=Date.now()+4*60*1000;
+  while(Date.now()<end){
+    await new Promise(r=>setTimeout(r,3000));
+    let j;try{j=await api('/api/MoneyIn/details/'+id)}catch(e){continue}
+    const ts=pick(j,'transStatus'),rc=String(pick(j,'resultCode')||''),txt=pick(j,'responsetext')||pick(j,'resultText')||'';
+    if(String(ts)==='1'||rc==='A0000'){
+      const ok=`<b>Payment approved</b> — ${money(amt)}<br>Transaction ${id}${pick(j,'authcode')?' · Auth '+pick(j,'authcode'):''}`;
+      say('ok',ok+'<br>Sending receipt…');
+      return say('ok',ok+'<br>'+await sendReceipt(id))}
+    const declined=['0','-1','2','3','4','5','6'].includes(String(ts))||/declin|fail|cancel|error/i.test(String(txt));
+    if(declined&&String(ts)!=='10')return say('err',`<b>Payment not completed</b> — ${txt||'status '+ts}<pre>${JSON.stringify(j,null,1).slice(0,600)}</pre>`);
+  }
+  say('err','Timed out waiting for the device. Check transaction '+id+' in PartnerHub.');
+}
+// ---- Card / ACH via Payabli embedded component ----
+let mode='device', comp=null, embReady=false, embLoading=null;
+const embActive=()=>mode==='card'||mode==='ach';
+function loadEmbScript(){
+  if(window.PayabliComponent)return Promise.resolve();
+  if(embLoading)return embLoading;
+  const sandbox=/sandbox/i.test(S.base);
+  return embLoading=new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src=sandbox?'https://embedded-component-sandbox.payabli.com/component.js':'https://embedded-component.payabli.com/component.js';
+    if(sandbox)s.setAttribute('data-test','');
+    s.onload=res;s.onerror=()=>{embLoading=null;rej(new Error('Could not load the Payabli embedded component script'))};
+    document.head.appendChild(s);
+  });
+}
+async function initEmbedded(){
+  embReady=false;comp=null;$('#pay-component-1').innerHTML='';update();
+  if(!S.pub||!S.entry){$('#cardhint').textContent='Not configured — add the entry name and public API token in ⚙ Settings.';return}
+  $('#cardhint').textContent='Loading payment form…';
+  try{await loadEmbScript()}catch(e){$('#cardhint').textContent=e.message;return}
+  if(!embActive())return;
+  const m=mode;
+  comp=new PayabliComponent({
+    type:'methodEmbedded',
+    rootContainer:'pay-component-1',
+    token:S.pub,
+    entryPoint:S.entry,
+    defaultOpen:m,
+    temporaryToken:true,
+    card:{enabled:m==='card',amex:true,discover:true,visa:true,mastercard:true,
+      inputs:{
+        cardNumber:{label:'CARD NUMBER',size:12,row:0,order:0},
+        cardExpirationDate:{label:'EXPIRATION',size:4,row:1,order:0},
+        cardCvv:{label:'CVV',size:4,row:1,order:1},
+        cardZipcode:{label:'POSTAL CODE',size:4,row:1,order:2}
+      }},
+    ach:{enabled:m==='ach',checking:true,savings:true},
+    functionCallBackSuccess:r=>embResult(r),
+    functionCallBackError:errs=>{say('err','Please check the payment details and try again.<pre>'+JSON.stringify(errs).slice(0,400)+'</pre>');busy=false;update()}
+  });
+  embReady=true;$('#cardhint').textContent='';update();
+}
+async function sendReceipt(transId){
+  try{
+    const j=await api('/api/MoneyIn/sendreceipt/'+encodeURIComponent(transId));   // no email param: goes to the email on file
+    return j.isSuccess===false?'Receipt could not be sent: '+(j.responseText||'error'):'Receipt emailed to the email on file.';
+  }catch(e){return 'Receipt could not be sent: '+e.message}
+}
+async function embResult(r){
+  busy=false;
+  const d=r&&r.responseData||{};
+  if(r&&r.responseText==='Success'){
+    const ok=`<b>Payment approved</b> — ${money(embAmt)} by ${mode==='ach'?'bank account (ACH)':'card'}<br>Transaction ${d.referenceId||''}${d.authCode?' · Auth '+d.authCode:''}`;
+    say('ok',ok+'<br>Sending receipt…');
+    say('ok',ok+'<br>'+(d.referenceId?await sendReceipt(d.referenceId):'Receipt not sent: no transaction ID returned.'));
+  }else{
+    say('err',`<b>Payment not completed</b> — ${d.resultText||r&&r.responseText||'declined'}`);
+  }
+  try{comp&&comp.payabliExec('reinit')}catch(e){}
+  update();
+}
+let embAmt=0;
+function payEmbedded(){
+  if(!comp)return;
+  if(!S.cust)return say('err','Payer customerId is missing — open ⚙ Settings.');
+  embAmt=total();busy=true;update();
+  say('wait','Processing payment…');
+  const cats=[];const by={};CHARGES.filter(c=>sel.has(c.id)).forEach(c=>by[c.g]=(by[c.g]||0)+c.a);
+  Object.entries(by).forEach(([g,v])=>cats.push({label:g,amount:Math.round(v*100)/100,qty:1}));
+  comp.payabliExec('pay',{
+    paymentDetails:{totalAmount:embAmt,serviceFee:0,categories:cats},
+    customerData:{customerId:Number(S.cust)||S.cust}   // receipt goes to the email already on this customer
+  });
+}
+function setMode(m){
+  mode=m;
+  $('#tabDev').classList.toggle('on',m==='device');$('#tabCard').classList.toggle('on',m==='card');$('#tabAch').classList.toggle('on',m==='ach');
+  $('#devPane').style.display=m==='device'?'':'none';$('#cardPane').style.display=m==='device'?'none':'';
+  $('#status').className='status';
+  if(m!=='device')initEmbedded();
+}
+$('#tabDev').onclick=()=>setMode('device');$('#tabCard').onclick=()=>setMode('card');$('#tabAch').onclick=()=>setMode('ach');
+$('#payEmb').onclick=payEmbedded;
+$('#refresh').onclick=loadDevices;$('#pay').onclick=pay;
+renderItems();update();renderDevs();loadDevices();
+</script>
+</body>
+</html>
